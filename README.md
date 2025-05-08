@@ -1,6 +1,6 @@
 # Что делает скрипт seller.py
 
-Этот скрипт помогает автоматически обновлять остатки товаров и цены в интернет-магазинах на площадках **Ozon** и **Яндекс.Маркет**.
+Этот скрипт помогает автоматически обновлять остатки товаров и цены в интернет-магазинах на площадке **Ozon**.
 
 ## Как это работает
 
@@ -250,3 +250,169 @@
 ## Для кого это
 
 Этот инструмент будет полезен продавцам на Яндекс.Маркете, особенно тем, кто работает одновременно в форматах FBS и DBS и хочет автоматизировать обновление данных о товарах.
+
+# Описание функций в market.py:
+
+# get_product_list(page: str, campaign_id: str, access_token: str) -> dict
+
+Получает список товаров из магазина на Яндекс.Маркете через API.
+
+## Аргументы
+- `page` (str): Токен страницы для пагинации
+- `campaign_id` (str): ID магазина на Яндекс.Маркете
+- `access_token` (str): Токен для авторизации в API
+
+## Возвращает
+- `dict`: Словарь с информацией о товарах
+
+## Пример
+```python
+>>> get_product_list("", "12345", "y0_AgAAAABR7C9...")
+{
+    'offerMappingEntries': [...],
+    'paging': {'nextPageToken': 'page2'}
+}
+```
+
+## Исключения
+- `requests.exceptions.HTTPError`: При ошибке API запроса
+
+# update_stocks(stocks: list, campaign_id: str, access_token: str) -> dict
+
+Обновляет остатки товаров в магазине на Яндекс.Маркете.
+
+## Аргументы
+- `stocks` (list): Список словарей с остатками товаров
+- `campaign_id` (str): ID магазина на Яндекс.Маркете
+- `access_token` (str): Токен для авторизации в API
+
+## Возвращает
+- `dict`: Ответ API об успешности обновления остатков
+
+## Пример
+```python
+>>> stocks = [{
+    "sku": "A1234",
+    "warehouseId": 1234,
+    "items": [{"count": 10, "type": "FIT"}]
+}]
+>>> update_stocks(stocks, "12345", "y0_AgAAAABR7C9...")
+{"status": "OK"}
+```
+
+# update_price(prices: list, campaign_id: str, access_token: str) -> dict
+
+Обновляет цены товаров в магазине на Яндекс.Маркете.
+
+## Аргументы
+- `prices` (list): Список словарей с ценами товаров
+- `campaign_id` (str): ID магазина на Яндекс.Маркете 
+- `access_token` (str): Токен для авторизации в API
+
+## Возвращает
+- `dict`: Ответ API об успешности обновления цен
+
+## Пример
+```python
+>>> prices = [{
+    "id": "A1234",
+    "price": {"value": 5990, "currencyId": "RUR"}
+}]
+>>> update_price(prices, "12345", "y0_AgAAAABR7C9...")
+{"status": "OK"}
+```
+
+# create_stocks(watch_remnants: list, offer_ids: list, warehouse_id: str) -> list
+
+Создает список остатков товаров в формате для API Яндекс.Маркета.
+
+## Аргументы
+- `watch_remnants` (list): Список товаров от поставщика
+- `offer_ids` (list): Список артикулов в магазине
+- `warehouse_id` (str): ID склада в Яндекс.Маркете
+
+## Возвращает
+- `list`: Список словарей с остатками для API
+
+## Пример
+```python
+>>> remnants = [{"Код": "A1234", "Количество": "10"}]
+>>> create_stocks(remnants, ["A1234"], "1234")
+[{
+    "sku": "A1234",
+    "warehouseId": "1234",
+    "items": [{"count": 10, "type": "FIT"}]
+}]
+```
+
+# create_prices(watch_remnants: list, offer_ids: list) -> list
+
+Создает список цен товаров в формате для API Яндекс.Маркета.
+
+## Аргументы
+- `watch_remnants` (list): Список товаров от поставщика
+- `offer_ids` (list): Список артикулов в магазине
+
+## Возвращает
+- `list`: Список словарей с ценами для API
+
+## Пример
+```python
+>>> remnants = [{"Код": "A1234", "Цена": "5990.00 руб."}]
+>>> create_prices(remnants, ["A1234"])
+[{
+    "id": "A1234",
+    "price": {"value": 5990, "currencyId": "RUR"}
+}]
+```
+
+# async upload_prices(watch_remnants: list, campaign_id: str, market_token: str) -> list
+
+Асинхронно загружает цены товаров в магазин на Яндекс.Маркете.
+
+## Аргументы
+- `watch_remnants` (list): Список товаров от поставщика
+- `campaign_id` (str): ID магазина на Яндекс.Маркете
+- `market_token` (str): Токен для авторизации в API
+
+## Возвращает
+- `list`: Список обновленных цен
+
+## Пример
+```python
+>>> remnants = [{"Код": "A1234", "Цена": "5990.00 руб."}]
+>>> await upload_prices(remnants, "12345", "y0_AgAAAABR7C9...")
+[{
+    "id": "A1234",
+    "price": {"value": 5990, "currencyId": "RUR"}
+}]
+```
+
+# async upload_stocks(watch_remnants: list, campaign_id: str, market_token: str, warehouse_id: str) -> tuple
+
+Асинхронно загружает остатки товаров в магазин на Яндекс.Маркете.
+
+## Аргументы
+- `watch_remnants` (list): Список товаров от поставщика
+- `campaign_id` (str): ID магазина на Яндекс.Маркете
+- `market_token` (str): Токен для авторизации в API
+- `warehouse_id` (str): ID склада
+
+## Возвращает
+- `tuple`: Кортеж из двух списков:
+  - Список товаров с ненулевыми остатками
+  - Полный список всех товаров с остатками
+
+## Пример
+```python
+>>> remnants = [{"Код": "A1234", "Количество": "10"}]
+>>> not_empty, all_stocks = await upload_stocks(
+...     remnants, "12345", "y0_AgAAAABR7C9...", "1234"
+... )
+>>> not_empty
+[{
+    "sku": "A1234",
+    "warehouseId": "1234",
+    "items": [{"count": 10, "type": "FIT"}]
+}]
+```
