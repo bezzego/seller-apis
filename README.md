@@ -27,9 +27,9 @@
 
 Этот инструмент полезен тем, кто хочет поддерживать актуальность ассортимента и цен в интернет-магазинах без лишних хлопот и ручной работы.
 
-# Описание функции "price_conversion" в seller.py
+# Описание функций в seller.py:
 
-## price_conversion(price: str) -> str
+# price_conversion(price: str) -> str
 
 Преобразует строку с ценой в числовой формат, удаляя все нечисловые символы.
 
@@ -55,3 +55,158 @@
 ## Примечание
 Функция игнорирует все, что находится после десятичной точки,
 и удаляет все нечисловые символы (пробелы, валюту, разделители)
+
+# get_product_list(last_id: str, client_id: str, seller_token: str) -> dict
+
+Получает список товаров из магазина Ozon через API.
+
+## Аргументы
+- `last_id` (str): ID последнего полученного товара для пагинации
+- `client_id` (str): ID клиента в системе Ozon
+- `seller_token` (str): Токен для авторизации в API Ozon
+
+## Возвращает
+- `dict`: Словарь с информацией о товарах
+  - Содержит: items (список товаров), total (общее количество), last_id
+
+## Пример
+```python
+>>> get_product_list("", "12345", "ABCD-token")
+{
+    'items': [...],
+    'total': 100,
+    'last_id': "20"
+}
+```
+
+## Исключения
+- `requests.exceptions.HTTPError`: При ошибке API запроса
+
+# get_offer_ids(client_id: str, seller_token: str) -> list
+
+Получает список артикулов всех товаров из магазина Ozon.
+
+## Аргументы
+- `client_id` (str): ID клиента в системе Ozon
+- `seller_token` (str): Токен для авторизации в API Ozon
+
+## Возвращает
+- `list`: Список артикулов товаров
+
+## Пример
+```python
+>>> get_offer_ids("12345", "ABCD-token")
+["A1234", "B5678", "C9012"]
+```
+
+# update_price(prices: list, client_id: str, seller_token: str) -> dict
+
+Обновляет цены товаров в магазине Ozon.
+
+## Аргументы
+- `prices` (list): Список словарей с ценами товаров
+- `client_id` (str): ID клиента в системе Ozon 
+- `seller_token` (str): Токен для авторизации в API Ozon
+
+## Возвращает
+- `dict`: Ответ API об успешности обновления цен
+
+## Пример
+```python
+>>> prices = [{"offer_id": "A1234", "price": "5990"}]
+>>> update_price(prices, "12345", "ABCD-token")
+{"result": "success"}
+```
+
+# update_stocks(stocks: list, client_id: str, seller_token: str) -> dict
+
+Обновляет остатки товаров в магазине Ozon.
+
+## Аргументы
+- `stocks` (list): Список словарей с остатками товаров
+- `client_id` (str): ID клиента в системе Ozon
+- `seller_token` (str): Токен для авторизации в API Ozon
+
+## Возвращает
+- `dict`: Ответ API об успешности обновления остатков
+
+## Пример
+```python
+>>> stocks = [{"offer_id": "A1234", "stock": 10}]
+>>> update_stocks(stocks, "12345", "ABCD-token")
+{"result": "success"}
+```
+
+# download_stock() -> list
+
+Скачивает файл остатков с сайта поставщика и преобразует его в список товаров.
+
+## Возвращает
+- `list`: Список словарей с информацией о товарах
+
+## Пример
+```python
+>>> download_stock()
+[{"Код": "A1234", "Количество": "10", "Цена": "5990.00 руб."}]
+```
+
+## Исключения
+- `requests.exceptions.HTTPError`: При ошибке скачивания файла
+
+# create_stocks(watch_remnants: list, offer_ids: list) -> list
+
+Создает список остатков товаров в формате для API Ozon.
+
+## Аргументы
+- `watch_remnants` (list): Список товаров от поставщика
+- `offer_ids` (list): Список артикулов в магазине Ozon
+
+## Возвращает
+- `list`: Список словарей с остатками для API Ozon
+
+## Пример
+```python
+>>> remnants = [{"Код": "A1234", "Количество": "10"}]
+>>> create_stocks(remnants, ["A1234"])
+[{"offer_id": "A1234", "stock": 10}]
+```
+
+# create_prices(watch_remnants: list, offer_ids: list) -> list
+
+Создает список цен товаров в формате для API Ozon.
+
+## Аргументы
+- `watch_remnants` (list): Список товаров от поставщика
+- `offer_ids` (list): Список артикулов в магазине Ozon
+
+## Возвращает
+- `list`: Список словарей с ценами для API Ozon
+
+## Пример
+```python
+>>> remnants = [{"Код": "A1234", "Цена": "5990.00 руб."}]
+>>> create_prices(remnants, ["A1234"])
+[{
+    "offer_id": "A1234",
+    "price": "5990",
+    "old_price": "0",
+    "currency_code": "RUB"
+}]
+```
+
+# divide(lst: list, n: int) -> list
+
+Разделяет список на части заданного размера.
+
+## Аргументы
+- `lst` (list): Исходный список
+- `n` (int): Размер каждой части
+
+## Возвращает
+- `generator`: Генератор списков заданного размера
+
+## Пример
+```python
+>>> list(divide([1,2,3,4,5], 2))
+[[1,2], [3,4], [5]]
+```
